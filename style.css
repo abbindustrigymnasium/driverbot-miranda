@@ -1,0 +1,31 @@
+body {
+  height: 100%;
+  width: 100%;
+  background-color: #d7c4d6;
+}
+
+.space-top {
+  padding-top: 10px;
+}
+
+#joystick {
+  height: 300px;
+  width: 300px;
+  border-radius: 300px;
+  -moz-border-radius: 300px;
+  -webkit-border-radius: 300px;
+  text-align: center;
+  background-color: #8bdde1;
+  font: 24px/300px Helvetica, Arial, sans-serif;
+  cursor: all-scroll;
+  user-select: none;
+}
+
+.noselect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
