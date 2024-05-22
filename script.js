@@ -1,3 +1,30 @@
+// Initialize Sets to store previously sent messages
+let sentMessagesX = new Set();
+let sentMessagesY = new Set();
+
+function sendMessage(topic, message, sentMessages) {
+
+
+  // Add the new message to the set of sent messages
+  sentMessages.add(message);
+  console.log(topic, "Sending message: " + message);
+
+  // Create and send the MQTT message
+  var mqttMessage = new Paho.MQTT.Message(message);
+  mqttMessage.destinationName = topic;
+  if (!client) {
+    console.log("Client is not yet connected!");
+    return;
+  }
+  client.send(mqttMessage);
+}
+
+// MQTT Connection Functions
+let client;
+const topicX = "miranda.akrawi.engelbrektsson@hitachigymnasiet.se/moveX";
+const topicY = "miranda.akrawi.engelbrektsson@hitachigymnasiet.se/moveY"; 
+let OldX = null
+let OldY = null
 function init() {
   var xCenter = 150;
   var yCenter = 150;
@@ -24,36 +51,54 @@ function init() {
   var mc = new Hammer(myElement);
 
   mc.on("panstart", function(ev) {
-    var pos = $('#joystick').position();
-    xCenter = psp.x;
-    yCenter = psp.y;
-    psp.alpha = 0.5;
-    stage.update();
+      xCenter = psp.x;
+      yCenter = psp.y;
+      psp.alpha = 0.5;
+      stage.update();
   });
 
   mc.on("panmove", function(ev) {
-    var pos = $('#joystick').position();
+      var pos = $('#joystick').position();
+      var coords = calculateCoords(ev.angle, ev.distance);
+      
+      var xScaled = coords.x / 100;
+      var yScaled = coords.y / 100;
 
-    var x = (ev.center.x - pos.left - 150);
-    var y = (ev.center.y - pos.top - 150);
-    $('#xVal').text('X: ' + x);
-    $('#yVal').text('Y: ' + (-1 * y));
+      xScaled = Math.round(xScaled);
+      yScaled = Math.round(yScaled);
     
-    var coords = calculateCoords(ev.angle, ev.distance);
-    
-    psp.x = coords.x;
-    psp.y = coords.y;
+      $('#xVal').text('X: ' + xScaled);
+      $('#yVal').text('Y: ' + (-1 * yScaled));
+      psp.x = coords.x + xCenter;
+      psp.y = coords.y + yCenter;
+      
+      psp.alpha = 0.5;
+      stage.update();
+      var xText = "right";
+      var yText = "backward";
 
-    psp.alpha = 0.5;
-    stage.update();
+      if (xScaled < 0.5) {
+        xText = "left";
+      }
 
-    // Send messages based on joystick movement
-    sendMessages(x, y);
+      if (yScaled < 0.5) {
+        yText = "forward";        
+      }
+
+      // Ensure the correct Set is passed
+      if(xText != OldX){
+        sendMessage(topicX, xText, sentMessagesX);
+        OldX = xText;
+      }
+      if(yText != OldY){
+        sendMessage(topicY, yText, sentMessagesY);
+        OldY = yText;
+      }
   });
 
   mc.on("panend", function(ev) {
-    psp.alpha = 0.25;
-    createjs.Tween.get(psp).to({x:xCenter,y:yCenter},750,createjs.Ease.elasticOut);
+      psp.alpha = 0.5;
+      createjs.Tween.get(psp).to({x:xCenter,y:yCenter},750,createjs.Ease.elasticOut);
   });
 }
 
@@ -68,40 +113,13 @@ function calculateCoords(angle, distance) {
   return coords;
 }
 
-function sendMessages(x, y) {
-  var threshold = 50; // Adjust threshold as needed
-
-  if (x <= -threshold) {
-    sendMessage("left");
-  } else if (x >= threshold) {
-    sendMessage("right");
-  }
-
-  if (y <= -threshold) {
-    sendMessage("forward");
-  } else if (y >= threshold) {
-    sendMessage("backwards");
-  }
-}
-
-function sendMessage(direction) {
-  // Here, you can implement code to send the message to your ESP8266 or MQTT broker
-  console.log("Sending message: " + direction);
-  // Replace this console.log with your actual code to send messages to the broker
-}
-
-// MQTT Connection Functions
-
-let client;
-let topic = "driver";
-
 function startConnect() {
   const host = document.getElementById("host").value;
   const port = document.getElementById("port").value;
-  const clientID = "clientId-ouvokvFDMn" + parseInt(Math.random() * 100);
+  const clientID = "clientId-" + parseInt(Math.random() * 100);
 
-  document.getElementById("messages").innerHTML += '<span>Connecting to: ' + host + ' on port: ' + port + '</span><br/>';
-  document.getElementById("messages").innerHTML += '<span>Using the following client value: ' + clientID + '</span><br/>';
+  document.getElementById("messages").innerHTML += `<span>Connecting to: ${host} on port: ${port}</span><br/>`;
+  document.getElementById("messages").innerHTML += `<span>Using the following client value: ${clientID}</span><br/>`;
 
   client = new Paho.MQTT.Client(host, Number(port), clientID);
   client.onConnectionLost = onConnectionLost;
@@ -109,46 +127,34 @@ function startConnect() {
 
   client.connect({
       userName: "miranda.akrawi.engelbrektsson@hitachigymnasiet.se",
-      password: "Cookie788",
+      password: "1234",
       onSuccess: onConnect,
       onFailure: onFail
   });
 }
 
-function startConnect() {
-  // Generate a random client ID
-  clientID = "clientID_" + parseInt(Math.random() * 100);
+function onConnect() {
+  document.getElementById("messages").innerHTML += '<span>Connected!</span><br/>';
+  client.subscribe(topicX);
+  client.subscribe(topicY);
 
-  // Fetch the hostname/IP address and port number from the form
-  host =document.getElementById("host").value;
-  port = document.getElementById("port").value;
-
-  // Print output for the user in the messages div
-  document.getElementById("messages").innerHTML += '<span>Connecting to: ' + host + ' on port: ' + port + '</span><br/>';
-  document.getElementById("messages").innerHTML += '<span>Using the following client value: ' + clientID + '</span><br/>';
-// Initialize new Paho client connection
-  client = new Paho.MQTT.Client(host, Number(port), clientID);
-  // Set callback handlers
-  client.onConnectionLost = onConnectionLost;
-  client.onMessageArrived = onMessageArrived;
-
-  client.connect({userName : "miranda.akrawi.engelbrektsson@hitachigymnasiet.se",password : "Cookie788",
-      onSuccess: onConnect,
-      onFailure: onFail,
-                 });
+  // Send "OnConnect" message to the broker
+  console.log("Sending OnConnect message");
+  sendMessage(topicX, "OnConnect", sentMessagesX);
 }
 
 function onFail(responseObject) {
   console.log("Failed to connect: " + responseObject.errorMessage);
+  document.getElementById("messages").innerHTML += `<span>Failed to connect: ${responseObject.errorMessage}</span><br/>`;
 }
 
 function onConnectionLost(responseObject) {
   if (responseObject.errorCode !== 0) {
       console.log("Connection lost: " + responseObject.errorMessage);
+      document.getElementById("messages").innerHTML += `<span>Connection lost: ${responseObject.errorMessage}</span><br/>`;
   }
 }
 
 function onMessageArrived(message) {
-  console.log("Message received: " + message.payloadString);
-  // Handle incoming messages here
+  console.log(message.destinationName, "Message payload: " + message.payloadString);
 }
