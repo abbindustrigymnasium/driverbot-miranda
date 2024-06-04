@@ -1,7 +1,10 @@
 body {
-  height: 100%;
-  width: 100%;
-  background-color: #d7c4d6;
+  height: 90%;
+  width: 98%;
+  /*background-color: #d7c4d6;*/
+  background-image: url("https://i.imgur.com/3UL1k49.jpeg");
+  background-repeat: no-repeat;
+  background-size: 1300px 600px;
 }
 
 .space-top {
@@ -15,10 +18,88 @@ body {
   -moz-border-radius: 300px;
   -webkit-border-radius: 300px;
   text-align: center;
-  background-color: #8bdde1;
+  background-color: #656bab;
   font: 24px/300px Helvetica, Arial, sans-serif;
   cursor: all-scroll;
   user-select: none;
+}
+
+#joystick {
+  margin-left: 480px;
+  margin-top: 50px;
+}
+
+
+h1 {
+  text-align: center; /* Center the heading */
+  margin-top: 10px;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center; /* Center the buttons horizontally */
+  margin-top: 10px; /* Add some margin between the buttons and the joystick */
+}
+
+/* Connect button */
+#connectButton {
+  align-items: center;
+  background-color: #818ec5;
+  border: 2px solid #111;
+  border-radius: 8px;
+  box-sizing: border-box;
+  color: #111;
+  cursor: pointer;
+  display: flex;
+  font-family: Inter, sans-serif;
+  font-size: 16px;
+  height: 48px;
+  justify-content: center;
+  line-height: 24px;
+  max-width: 100%;
+  padding: 0 25px;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  width: 200px; /* Set a fixed width */
+}
+
+#connectButton:after {
+  background-color: #111;
+  border-radius: 8px;
+  content: "";
+  display: block;
+  height: 48px;
+  left: 0;
+  width: 100%;
+  position: absolute;
+  top: -2px;
+  transform: translate(8px, 8px);
+  transition: transform .2s ease-out;
+  z-index: -1;
+}
+
+#connectButton:hover:after {
+  transform: translate(0, 0);
+}
+
+#connectButton:active {
+  background-color: #ffffff;
+  outline: 0;
+}
+
+#connectButton:hover {
+  outline: 0;
+}
+
+@media (min-width: 768px) {
+  #connectButton {
+    padding: 0 40px;
+    width: 220px; /* Adjust the width for larger screens if needed */
+  }
 }
 
 .noselect {
