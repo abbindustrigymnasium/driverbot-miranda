@@ -22,8 +22,11 @@
                 // Set callback handlers
                 client.onConnectionLost = onConnectionLost;
                 client.onMessageArrived = onMessageArrived;
+                client.onConnect = onConnect;
+                client.onFail = onFail;
+                client.onSend = onSend;
             
-                client.connect({userName : "miranda.akrawi.engelbrektsson@hitachigymnasiet.se",password : "Cookie788",
+                client.connect({userName : "miranda.akrawi.engelbrektsson@hitachigymnasiet.se",password : "1234",
                     onSuccess: onConnect,
                     onFailure: onFail,
                                });
@@ -36,16 +39,17 @@
             // Called when the client connects
             function onConnect() {
                 // Fetch the MQTT topic from the form
-                topic +=document.getElementById("topic").value;
+                topic += document.getElementById("topic").value;
                 console.log(topic);
                 // Print output for the user in the messages div
                 document.getElementById("messages").innerHTML += '<span>Subscribing to: ' + topic + '</span><br/>';
             
                 // Subscribe to the requested topic
                  client.subscribe(topic);
-                  message= new Paho.MQTT.Message("Webbsite Connected!");
+                  message= new Paho.MQTT.Message("Subscriber connected!");
                   message.destinationName=topic;
                   client.send(message);
+                  client.onMessageArrived = onMessageArrived;
             }
             function onSend() {
                 // Fetch the MQTT topic from the form
@@ -54,6 +58,7 @@
                 console.log(message);
                 message= new Paho.MQTT.Message(message);
                 message.destinationName=topic;
+                console.log(topic);
                 client.send(message);
             }
             // Called when the client loses its connection
@@ -66,6 +71,7 @@
             
             // Called when a message arrives
             function onMessageArrived(message) {
+                console.log(message);
                 console.log("onMessageArrived: " + message.payloadString);
                 document.getElementById("messages").innerHTML += '<span>Topic: ' + message.destinationName + '  | ' + message.payloadString + '</span><br/>';
             }
@@ -87,7 +93,7 @@
             <b>Port:</b>
             <input id="port" type="text" name="port" value="8883"><br>
             <b>Topic:</b>
-            <input id="topic" type="text" name="topic" value="driver"><br><br>
+            <input id="topic" type="text" name="topic" value="moveX"><br><br>
             <input type="button" onclick="startConnect()" value="Connect">
             <input type="button" onclick="startDisconnect()" value="Disconnect">
 <br><br>
