@@ -12,18 +12,19 @@
 </head>
 <body class="noselect" onload="init();">
   <div class="container space-top">
-    <h1 class="center blue-text thin">Driver Control</h1>
-    <div class="center-align">
+    <h1 class="center blue-text thin" style="font-size:60px;">Driverbot - Mirakl</h1> 
+    <div class="button-container">
+      <button id="connectButton" onclick="startConnect()">Connect</button>
+    </div>    
+    <div align-content: center>
       <canvas id="joystick" height="300" width="300"></canvas>
     </div>
-    <p id="xVal" class="light">X: </p>
-    <p id="yVal" class="light">Y: </p>
-    <label for="host">Host:</label>
-    <input type="text" id="host">
-    <label for="port">Port:</label>
-    <input type="text" id="port">
-    <button onclick="startConnect()">Connect</button>
+    <!--<p id="xVal" class="light">X: </p>
+    <p id="yVal" class="light">Y: </p> -->
+    <input type="hidden" id="host" value="maqiatto.com">
+    <input type="hidden" id="port" value="8883">
   </div>
-  <div id="messages"></div> <!-- Add this for MQTT messages -->
+  <div class="hidden" id="messages"></div> <!-- Add this for MQTT messages -->
 </body>
 </html>
+
